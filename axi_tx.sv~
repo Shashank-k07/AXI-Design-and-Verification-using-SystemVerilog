@@ -1,0 +1,57 @@
+typedef enum{write_only,read_only,write_then_read,write_parallel_read}write_read;
+
+class axi_tx;
+	//include all the signals which are input
+	//maintain rand keyword
+	
+	rand write_read wr_rd;// Now wr_rd can takes random values out four constant values listed
+	//write address channel
+	rand bit [31:0]awaddr;
+	rand bit[3:0]awlen;
+	rand bit[3:0] awid;
+	rand bit [2:0] awsize;
+	rand bit [1:0] awburst;
+	rand bit [1:0] awlock;
+	rand bit [3:0] awcache;
+	rand bit [2:0] awprot;
+	rand bit awvalid;
+ 	     bit awready;
+
+	//write data channel
+	rand bit [3:0] wid;
+	rand bit [31:0] wdata[$];
+	rand bit [3:0] wstrb;
+	rand bit wlast;
+	rand bit wvalid;
+	     bit wready;
+
+	//write response channel
+	bit [3:0] bid;
+	bit[1:0] bresp;
+	bit bvalid;
+	rand bit bready;
+
+	//read address channel
+	rand bit [31:0]araddr;
+	rand bit[3:0]arlen;
+	rand bit[3:0] arid;
+	rand bit [2:0] arsize;
+	rand bit [1:0] arburst;
+	rand bit [1:0] arlock;
+	rand bit [3:0] arcache;
+	rand bit [2:0] arprot;
+	rand bit arvalid;
+ 	     bit arready;
+
+	//read data/response channel
+	bit [3:0] rid;
+	bit  [31:0] rdata;
+	bit [1:0] rresp;
+	bit rlast;
+	bit rvalid;
+	rand bit rready;
+
+	constraint c1{
+		wdata.size() == awlen+1;
+		}
+endclass

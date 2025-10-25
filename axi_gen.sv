@@ -1,0 +1,637 @@
+class axi_gen;
+	axi_tx tx;
+	task run();
+		case(common::testname)
+		//Single write case
+		"single_write_test":begin//Verified
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 0; awlen==1; awsize==2; awburst==1; wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+		end//End of single write testcase
+
+		//Multiple write testcase
+		"multiple_write_test":begin// Verified 
+			//1. aligned address 4 bytes are active in each
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==0; awlen==1; awsize==2; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+		//	@(posedge common::vif.aclk);
+			//2.2nd transaction with  Unaligned address
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==10; awlen==1; awsize==2;  awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+			//3. 3rd transaction aligned address with narrow transfer 
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==20; awlen==1; awsize==1; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+			//4. 4th transaction UNalligned address with narrow transfer
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==37; awlen==1; awsize==2; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+			//5. 5th transaction
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==100; awlen==1; awsize==2; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+	       	end
+
+		//Single write and then read test
+		"single_write_read_test":begin//Verified
+	       		tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr == 0; araddr==awaddr; awlen == 1; awsize == 2; awburst == 1; arburst==awburst;arsize==awsize; wid == awid; arid==awid; arlen==awlen;};
+			common::gen2bfm.put(tx);
+			@(posedge common::vif.aclk);
+			//tx.randomize with {wr==	
+		end
+
+		//Multiple write read testcase 
+		"multiple_write_read_test":begin //Verified	
+			//1.First transaction: Aligned adddress
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==0; awlen==1; awid==1; wid==awid; awburst==1; awsize==2; araddr==0; arlen==1; arburst==1;arsize==2;};
+		       common::gen2bfm.put(tx);	
+
+		       //2.Second transaction: Unaligned address
+		       tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==13; awlen==2; awid==2; wid==awid; awburst==1; awsize==2;araddr==13; arlen==2; arburst==1; arsize==2;};
+		       common::gen2bfm.put(tx);
+
+		       //3.Third transaction: Aligned address with narrow transfer 
+		       tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==36; awlen==3; awid==3; wid==awid; awburst==1; awsize==1;araddr==36; arlen==3; arburst==1; arsize==1;};
+		       common::gen2bfm.put(tx);
+
+		       //4.Fourth transaction: Unliagned address with narrow transfer 
+		       tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==77; awlen==4; awid==4; wid==awid; awburst==1; awsize==1;araddr==77; arlen==4; arburst==1; arsize==1;};
+		       common::gen2bfm.put(tx);
+
+		       //5.Fifth transaction: Narrow transfer
+		       tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==205; awlen==5; awid==5; wid==awid; awburst==1; awsize==1;araddr==205; arlen==5; arburst==1; arsize==1;};
+		       common::gen2bfm.put(tx);
+		end
+		
+		//Overlapping transaction testcase 
+		"overlapping_transaction_test":begin//Verified
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==0; awlen==3; awsize==2; awburst==1; awid==5; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address and first transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==100; awlen==3; awsize==2; awburst==1; awid==10; awvalid==1; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==200; awlen==3; awsize==2; awburst==1; awid==11; awvalid==1; wvalid==1; wid==10;};
+			common::gen2bfm.put(tx);
+
+			//3rd transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==300; awlen==3; awsize==2; awburst==1; awid==12; awvalid==0; wvalid==1; wid==11;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{araddr==0; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==100; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+
+
+
+			
+	       	end
+
+		//Out of order transaction testcase
+		"out_of_order_transaction_test":begin//Verified
+		       	tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 0; awlen==3; awsize==2; awburst==1; awid==5; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 100; awlen==3; awsize==2; awburst==1; awid==10; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 200; awlen==3; awsize==2; awburst==1; awid==15; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==15;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==5;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==10;};
+			common::gen2bfm.put(tx);
+
+			//Read time
+			tx = new();
+			tx.randomize with{araddr==100; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==0; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+
+
+
+				
+		end
+
+		//Increment transaction testcase
+		"incriment_transaction_test":begin //Verified
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==0; awlen==1; awsize==2; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+		//	@(posedge common::vif.aclk);
+			//2.2nd transaction with  Unaligned address
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==10; awlen==1; awsize==2;  awburst==1;wid==awid;};
+			//now all the signals gets randomize
+
+		end
+
+		//Narrow transfer test
+		"narrow_transfer_test":begin //Verified
+		 	tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==36; araddr==awaddr; awlen==1; arlen==awlen; awid==3; wid==awid; arid==awid; awburst==1; arburst==awburst; awsize==1; arsize==awsize;};
+		       	common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr ==100; awlen==1; awsize==2; awburst==1;wid==awid;};
+			//now all the signals gets randomize
+			common::gen2bfm.put(tx);//generator to bfm using mailbox
+		end
+
+		//Narrow transfer with aligned transfer
+		"aligned_narrow_transfer":begin //Verified
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==36; araddr==awaddr; awlen==1; arlen==awlen; awid==3; wid==awid; arid==awid; awburst==1; arburst==awburst; awsize==1; arsize==awsize;};
+		       common::gen2bfm.put(tx);
+		       	tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==80; araddr==awaddr; awlen==1; arlen==awlen; awid==4; wid==awid; arid==awid; awburst==1; arburst==awburst; awsize==1; arsize==awsize;};
+		       common::gen2bfm.put(tx);
+
+		end
+
+		//Narrow transfer with unaligned address
+		"unaligned_narrow_transfer":begin//Verified
+	       		tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==77; araddr==awaddr; awlen==1; arlen==awlen; awid==4; wid==awid; arid==awid; awburst==1; arburst==awburst; awsize==1; arsize==awsize;};
+		       common::gen2bfm.put(tx);
+
+		       //5.Fifth transaction: Narrow transfer
+		       	tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==205; araddr==awaddr; awlen==2; arlen==awlen; awid==5; wid==awid; arid==awid; awburst==1; arburst==awburst; awsize==1; arsize==awsize;};
+		       common::gen2bfm.put(tx);
+	
+		end
+
+		"overlapping_out_of_order_test":begin//Verified
+
+			//1st write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==0; awlen==3; awsize==2; awburst==1; awid==5; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==100; awlen==3; awsize==2; awburst==1; awid==10; awvalid==1; wvalid==0; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==200; awlen==3; awsize==2; awburst==1; awid==11; awvalid==1; wvalid==1; wid==10;};
+			common::gen2bfm.put(tx);
+
+			//1st write data 
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==300; awlen==3; awsize==2; awburst==1; awid==12; awvalid==0; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==300; awlen==3; awsize==2; awburst==1; awid==12; awvalid==0; wvalid==1; wid==11;};
+			common::gen2bfm.put(tx);
+
+
+
+			tx = new();
+			tx.randomize with{wr_rd==read_only; araddr==0; arsize==2; arlen==3; arburst==1;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==100; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);			
+	       	end
+
+		"outoforder_narrow_transfer_align":begin//Verified
+				
+			//1.First write address of ID:1 with awsize 0
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 0; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2.Second write address of ID:2 with awsize 1
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 100; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//3.Third write address of ID:3 with awsize 2
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 200; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==2;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==1;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==3;};
+			common::gen2bfm.put(tx);
+
+			//Read time
+			tx = new();
+			tx.randomize with{araddr==100; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==0; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+       
+		end
+		
+		"outoforder_narrow_transfer_unalign":begin//Verified
+	       		//1.First write address of ID:1 with awsize 0
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 1; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2.Second write address of ID:2 with awsize 1
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 101; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//3.Third write address of ID:3 with awsize 2
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr == 201; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==2;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==1;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with {wr_rd==write_only; wvalid==1; awvalid==0; wid==3;};
+			common::gen2bfm.put(tx);
+
+			//Read time
+			tx = new();
+			tx.randomize with{araddr==201; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==1; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==101; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+
+		end
+
+		"overlapping_narrow_transfer_align":begin//Verified
+			//1 write address with awsize 0
+	     		tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==0; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address and first transaction write data with awsize 1
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==100; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==1; wid==1;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data with awsize 2
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==200; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==1; wid==2;};
+			common::gen2bfm.put(tx);
+
+			//4th write address 3rd transaction write data with awsize 0
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==300; awlen==3; awsize==0; awburst==1; awid==4; awvalid==1; wvalid==1; wid==3;};
+			common::gen2bfm.put(tx);
+
+			//5th Write address 4th transaction write data with awsize 1
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr==400; awlen==3; awsize==1; awburst==1; awid==5; awvalid==1;wvalid==1; wid==4;};
+			common::gen2bfm.put(tx);
+
+			//5th transaction write  data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==500; awlen==3; awsize==2; awburst==1; awid==6; awvalid==0; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+
+
+			tx = new();
+			tx.randomize with{araddr==0; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==100; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==300; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==400; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+  
+		end
+
+		"overlapping_narrow_transfer_unalign":begin//Verified
+			//1 write address with awsize 0
+	     		tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==1; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address and first transaction write data with awsize 1
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==101; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==1; wid==1;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data with awsize 2
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==202; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==1; wid==2;};
+			common::gen2bfm.put(tx);
+
+			//4th write address 3rd transaction write data with awsize 0
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==303; awlen==3; awsize==0; awburst==1; awid==4; awvalid==1; wvalid==1; wid==3;};
+			common::gen2bfm.put(tx);
+
+			//5th Write address 4th transaction write data with awsize 1
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr==405; awlen==3; awsize==1; awburst==1; awid==5; awvalid==1;wvalid==1; wid==4;};
+			common::gen2bfm.put(tx);
+
+			//5th transaction write  data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==500; awlen==3; awsize==2; awburst==1; awid==6; awvalid==0; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+
+
+			tx = new();
+			tx.randomize with{araddr==1; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==101; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==202; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==303; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==405; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+       
+		end
+
+		"outoforder_overlapping_narrow_align":begin//Verified 
+			//1st write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==0; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==100; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==0; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==200; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==1; wid==2;};
+			common::gen2bfm.put(tx);
+
+			//4th write address and 1st write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==300; awlen==3; awsize==0; awburst==1; awid==4; awvalid==1; wvalid==1; wid==1;};
+			common::gen2bfm.put(tx);
+
+			//5th write data and 4th write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==400; awlen==3; awsize==1; awburst==1; awid==5; awvalid==1; wvalid==1; wid==4;};
+			common::gen2bfm.put(tx);
+
+			//5th write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==600; awlen==3; awsize==2; awburst==1; awid==6; awvalid==0; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==700; awlen==3; awsize==0; awburst==1; awid==7; awvalid==0; wvalid==1; wid==3;};
+			common::gen2bfm.put(tx);
+
+
+
+			tx = new();
+			tx.randomize with{araddr==0; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==400; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==100; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==200; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==300; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);				
+		end
+
+		"outoforder_overlapping_narrow_unalign":begin //Verified
+			//1st write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==1; awlen==3; awsize==0; awburst==1; awid==1; awvalid==1; wvalid==0;};
+			common::gen2bfm.put(tx);
+
+			//2nd write address
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==101; awlen==3; awsize==1; awburst==1; awid==2; awvalid==1; wvalid==0; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write address and second transaction write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==202; awlen==3; awsize==2; awburst==1; awid==3; awvalid==1; wvalid==1; wid==2;};
+			common::gen2bfm.put(tx);
+
+			//4th write address and 1st write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==301; awlen==3; awsize==0; awburst==1; awid==4; awvalid==1; wvalid==1; wid==1;};
+			common::gen2bfm.put(tx);
+
+			//5th write data and 4th write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==403; awlen==3; awsize==1; awburst==1; awid==5; awvalid==1; wvalid==1; wid==4;};
+			common::gen2bfm.put(tx);
+
+			//5th write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==600; awlen==3; awsize==2; awburst==1; awid==6; awvalid==0; wvalid==1; wid==5;};
+			common::gen2bfm.put(tx);
+
+			//3rd write data
+			tx = new();
+			tx.randomize with { wr_rd==write_only; awaddr==700; awlen==3; awsize==0; awburst==1; awid==7; awvalid==0; wvalid==1; wid==3;};
+			common::gen2bfm.put(tx);
+
+
+
+			tx = new();
+			tx.randomize with{araddr==1; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==403; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==101; arsize==1; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==202; arsize==2; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+			tx = new();
+			tx.randomize with{araddr==301; arsize==0; arlen==3; arburst==1; wr_rd==read_only;};
+			common::gen2bfm.put(tx);
+		end
+
+		"write_parallel_read":begin //Verified
+			tx = new();
+			tx.randomize with {wr_rd==write_only; awaddr==0; awlen==3; awsize==2; awburst==1; awid==1; wid==awid; };
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==write_parallel_read; awaddr==100; awlen==3; awsize==2; awburst==1; awid==2; wid==awid;araddr==0; arlen==3; arburst==1; arsize==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==write_parallel_read; awaddr==200; awlen==3; awsize==2; awburst==1; awid==3; wid==awid; araddr==100; arlen==3; arburst==1;arsize==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==read_only;araddr==200; arlen==3; arburst==1;arsize==2;};
+			common::gen2bfm.put(tx);	
+		end
+
+		"fixed_type_transaction":begin 
+			tx = new();
+			tx.randomize with{wr_rd==write_only; awlen==1; awburst==0; awid==1; awsize==2; wid==awid;};
+			common::gen2bfm.put(tx);
+		
+			tx = new();
+			tx.randomize with{wr_rd==write_only; awlen==1; awburst==0; awid==1; awsize==2; wid==awid;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==write_only; awlen==1; awburst==0; awsize==2; wid==awid;};
+			common::gen2bfm.put(tx);
+			
+			tx = new();
+			tx.randomize with{wr_rd==read_only; arlen==1; arburst==0;arsize==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==read_only; arlen==1; arburst==0; arsize==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==read_only; arlen==1; arburst==0; arsize==2;};
+			common::gen2bfm.put(tx);
+		end
+
+		"wrap_transaction_test":begin
+		    //1. aligned address 4 bytes are active in each
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr ==4; awlen==3; awsize==2; awburst==2;wid==awid; araddr==4; arlen==3; arsize==2; arburst==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr ==32'h38; awlen==3; awsize==2;  awburst==2;wid==awid; araddr==32'h38; arlen==3; arsize==2; arburst==2;};
+			common::gen2bfm.put(tx);
+			 
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr ==32'h34; awlen==7; awsize==2; awburst==2;wid==awid; araddr==32'h34; arlen==7; arsize==2; arburst==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with{wr_rd==write_then_read; awaddr==4; awlen==3; awsize==1; awburst==2; wid==awid; araddr==32'h4; arlen==3; arsize==1; arburst==2;};
+			common::gen2bfm.put(tx);
+
+
+			tx = new();
+			tx.randomize with{wr_rd==write_then_read; awaddr==32'h38; awlen==7; awsize==0; awburst==2; wid==awid; araddr==32'h38; arlen==7; arsize==0; arburst==2;};
+			common::gen2bfm.put(tx);
+
+			
+		end
+
+		"Wrap_transaction_error_response":begin
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr ==4; awlen==4; awsize==2; awburst==2;wid==awid; araddr==4; arlen==4; arsize==2; arburst==2;};
+			common::gen2bfm.put(tx);
+			
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==12; awlen==3; awsize==2; awburst==2; wid==awid; araddr==12; arsize==2; arlen==3; arburst==2;};
+			common::gen2bfm.put(tx);
+
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr ==32'h39; awlen==3; awsize==2;  awburst==2;wid==awid; araddr==32'h39; arlen==3; arsize==2; arburst==2;};
+			common::gen2bfm.put(tx);
+			
+			tx = new();
+			tx.randomize with {wr_rd==write_then_read; awaddr==24; awlen==7; awsize==2; awburst==2; wid==awid; araddr==24; arsize==2; arlen==7; arburst==2;};
+			common::gen2bfm.put(tx);
+		 end
+
+		"all_combination_awsize_test":begin end
+
+		"all_combination_awlen":begin end
+		
+		"all_combination_wstrb":begin end
+		
+		"all_combination_wdata_size":begin end
+
+		endcase
+		
+	endtask
+	
+endclass

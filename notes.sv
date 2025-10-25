@@ -1,0 +1,12 @@
+module top;
+initial begin
+	`ifdef first
+		$display("a");
+	`endif
+	`ifdef second
+		$display("b");
+	`else
+		$display("c");
+	`endif
+end
+endmodule

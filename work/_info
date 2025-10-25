@@ -1,0 +1,111 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/VLSI/AMBA AXI
+Yaxi_interface
+Z0 DXx6 sv_std 3 std 0 22 WmjPaeP=7F5?QFXzJ>D[Q2
+Z1 DXx4 work 11 run_sv_unit 0 22 lEh:mTOY_YnbMQaKO00AS3
+Z2 VDg1SIo80bB@j0V0VzS_@n1
+r1
+!s85 0
+31
+!i10b 1
+!s100 45>ghQeALXS<oS4KN>ngT1
+I`3eRTGcPR]BZ]8dMf?::;1
+Z3 !s105 run_sv_unit
+S1
+Z4 dC:/Projects/AXI
+w1760678528
+8axi_interface.sv
+Z5 Faxi_interface.sv
+L0 1
+Z6 OE;L;10.4e;61
+Z7 !s108 1761202821.000000
+Z8 !s107 axi_top.sv|axi_env.sv|axi_scoreboard.sv|axi_monitor.sv|axi_slave_bfm.sv|axi_bfm.sv|axi_gen.sv|common.sv|axi_interface.sv|axi_tx.sv|run.sv|
+Z9 !s90 -reportprogress|300|run.sv|
+!i113 0
+Z10 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+vaxi_top
+R0
+R1
+R2
+r1
+!s85 0
+31
+!i10b 1
+!s100 UZok8Qam<K2E_TV3TA?Rj3
+Ih^fH2cJLBFe>5BkzzOD310
+R3
+S1
+R4
+w1761201800
+8axi_top.sv
+Z11 Faxi_top.sv
+L0 1
+R6
+R7
+R8
+R9
+!i113 0
+R10
+Xrun_sv_unit
+R0
+VlEh:mTOY_YnbMQaKO00AS3
+r1
+!s85 0
+31
+!i10b 1
+!s100 6_S7CcGS?IJ?SnK^WBSWH1
+IlEh:mTOY_YnbMQaKO00AS3
+!i103 1
+S1
+R4
+w1761202811
+8run.sv
+Frun.sv
+Faxi_tx.sv
+R5
+Fcommon.sv
+Faxi_gen.sv
+Faxi_bfm.sv
+Faxi_slave_bfm.sv
+Faxi_monitor.sv
+Faxi_scoreboard.sv
+Faxi_env.sv
+R11
+L0 1
+R6
+R7
+R8
+R9
+!i113 0
+R10
+vtop
+R0
+!s110 1760373085
+!i10b 1
+!s100 d=[>N3`FiZQ[AZj?z>O_L1
+IeFPJ^Vdj[1L<jKbz=C`K83
+R2
+!s105 notes_sv_unit
+S1
+dC:/AXI
+w1760373083
+8notes.sv
+Fnotes.sv
+L0 1
+R6
+r1
+!s85 0
+31
+!s108 1760373085.000000
+!s107 notes.sv|
+!s90 -reportprogress|300|notes.sv|
+!i113 0
+R10
